@@ -303,18 +303,17 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section id="categories" className="h-screen snap-start bg-[#FCFAF7] flex items-center">
+      <section id="categories" className="min-h-screen snap-start bg-[#FCFAF7] flex items-center py-12">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-6"
           >
-            <Badge className="mb-4 px-4 py-1.5 text-sm bg-green-100 text-green-800">Our Selection</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Explore Our Categories</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Explore Our Categories</h2>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
               Discover the finest selection of authentic Italian products, carefully curated from local artisans and
               producers.
             </p>
@@ -322,21 +321,6 @@ export default function Home() {
 
           {/* Replace the grid with the new carousel component */}
           <CategoryCarousel />
-
-          <motion.div
-            className="mt-12 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-8" asChild>
-              <Link href="/products">
-                View all products
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </motion.div>
         </div>
       </section>
 

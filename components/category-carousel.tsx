@@ -39,7 +39,7 @@ const categories = [
   {
     name: "Sweets",
     description: "Traditional Italian desserts and confections",
-    image: "https://images.unsplash.com/photo-1486428128344-5413e434ad35?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8Y2FrZXxlbnwwfDB8MHx8fDA%3D",
+    image: "https://images.unsplash.com/photo-1486428128344-5413e434ad35?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8Y2FrZXxlbnwwfDB8MHx8fDA%3D%3D",
     color: "from-pink-300 to-pink-500",
     icon: "",
   },
@@ -53,35 +53,16 @@ const categories = [
 ]
 
 export default function CategoryCarousel() {
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [rotation, setRotation] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const [visibleItems, setVisibleItems] = useState(3)
   const [autoplay, setAutoplay] = useState(true)
   const autoplayRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Handle responsive display
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setVisibleItems(1)
-      } else if (window.innerWidth < 1024) {
-        setVisibleItems(2)
-      } else {
-        setVisibleItems(3)
-      }
-    }
-
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
 
   // Autoplay functionality
   useEffect(() => {
     if (autoplay) {
       autoplayRef.current = setInterval(() => {
-        nextSlide()
+        nextRotation()
       }, 3000)
     }
 
@@ -92,17 +73,23 @@ export default function CategoryCarousel() {
     }
   }, [autoplay])
 
-  const nextSlide = () => {
+  const nextRotation = () => {
     if (isAnimating) return
     setIsAnimating(true)
-    setActiveIndex((prev) => (prev + 1) % (categories.length - visibleItems + 1))
+    setRotation((prev) => {
+      const newRotation = Math.round(prev + 60)
+      return newRotation
+    })
     setTimeout(() => setIsAnimating(false), 500)
   }
 
-  const prevSlide = () => {
+  const prevRotation = () => {
     if (isAnimating) return
     setIsAnimating(true)
-    setActiveIndex((prev) => (prev === 0 ? 0 : prev - 1))
+    setRotation((prev) => {
+      const newRotation = Math.round(prev - 60)
+      return newRotation
+    })
     setTimeout(() => setIsAnimating(false), 500)
   }
 
@@ -110,14 +97,13 @@ export default function CategoryCarousel() {
   const resumeAutoplay = () => setAutoplay(true)
 
   return (
-    <div className="relative py-8" onMouseEnter={pauseAutoplay} onMouseLeave={resumeAutoplay}>
+    <div className="relative py-4" onMouseEnter={pauseAutoplay} onMouseLeave={resumeAutoplay}>
       {/* Navigation Buttons */}
       <div className="absolute top-1/2 left-4 z-10 transform -translate-y-1/2">
         <Button
           variant="outline"
           size="icon"
-          onClick={prevSlide}
-          disabled={activeIndex === 0}
+          onClick={prevRotation}
           className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -127,97 +113,91 @@ export default function CategoryCarousel() {
         <Button
           variant="outline"
           size="icon"
-          onClick={nextSlide}
-          disabled={activeIndex === categories.length - visibleItems}
+          onClick={nextRotation}
           className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
         >
           <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* Carousel Track */}
-      <div ref={carouselRef} className="overflow-hidden">
+      {/* Circular Carousel Container */}
+      <div className="relative w-full h-[400px] flex items-end justify-center">
         <motion.div
-          className="flex gap-6"
-          initial={false}
-          animate={{ x: `-${activeIndex * (100 / visibleItems)}%` }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="relative w-[600px] h-[600px] -mb-[400px]"
+          animate={{ rotate: rotation }}
+          transition={{ type: "spring", stiffness: 100, damping: 20 }}
         >
-          {categories.map((category, index) => (
-            <motion.div
-              key={index}
-              className={`flex-shrink-0 w-full sm:w-1/2 lg:w-1/3`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-            >
-              <Link href="/products" className="block">
-                <div className="relative h-80 rounded-2xl overflow-hidden group">
-                  {/* Background Image with Overlay */}
-                  <Image
-                    src={category.image || "/placeholder.svg"}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-70 mix-blend-multiply`}
-                  />
+          {categories.map((category, index) => {
+            // Start from -90 degrees (top) and space evenly
+            const angle = ((index * 60) - 90) * (Math.PI / 180) // Convert to radians, start from top
+            const radius = 280 // Distance from center
+            const x = Math.round(Math.cos(angle) * radius)
+            const y = Math.round(Math.sin(angle) * radius)
+            
+            // Calculate which card should be larger based on current rotation
+            // The card at the top center position should be larger
+            const cardAngle = ((index * 60) - 90 + rotation) % 360
+            const isTopCenter = Math.abs(cardAngle) < 30 || Math.abs(cardAngle - 360) < 30
+            const cardSize = isTopCenter ? 64 : 48 // 256px vs 192px
+            const cardOffset = isTopCenter ? 128 : 96 // Half of card size
 
-                  {/* Content */}
-                  <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                    <div className="text-6xl">{category.icon}</div>
-                    <div>
-                      <h3 className="text-3xl font-bold text-white mb-2">{category.name}</h3>
-                      <p className="text-white/90">{category.description}</p>
+            return (
+              <motion.div
+                key={index}
+                className={`absolute ${isTopCenter ? 'w-64 h-64' : 'w-48 h-48'}`}
+                style={{
+                  left: `calc(50% + ${x}px - ${cardOffset}px)`,
+                  top: `calc(50% + ${y}px - ${cardOffset}px)`,
+                }}
+                initial={false}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Link href="/products" className="block">
+                  <motion.div 
+                    className={`relative rounded-full overflow-hidden group cursor-pointer ${isTopCenter ? 'h-64 w-64' : 'h-48 w-48'}`}
+                    animate={{ rotate: -rotation }}
+                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                  >
+                    {/* Background Image with Overlay */}
+                    <Image
+                      src={category.image || "/placeholder.svg"}
+                      alt={category.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-70 mix-blend-multiply`}
+                    />
 
-                      {/* Animated Arrow */}
-                      <motion.div
-                        className="mt-4 inline-block"
-                        initial={{ x: 0 }}
-                        whileHover={{ x: 10 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      >
-                        <span className="text-white font-medium flex items-center">
-                          Explore
-                          <svg
-                            className="w-5 h-5 ml-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            />
-                          </svg>
-                        </span>
-                      </motion.div>
+                    {/* Content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+                      <h3 className={`font-bold text-white mb-4 leading-tight ${isTopCenter ? 'text-2xl' : 'text-lg'}`}>{category.name}</h3>
+                      <p className={`text-white/90 leading-tight hidden group-hover:block ${isTopCenter ? 'text-lg' : 'text-sm'}`}>
+                        {category.description}
+                      </p>
                     </div>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+
+                    {/* Hover Effect */}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </motion.div>
+                </Link>
+              </motion.div>
+            )
+          })}
         </motion.div>
+
+        {/* Center Element */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-10 -mb-[100px]">
+          <div className="w-32 h-32 rounded-full bg-green-500/20 backdrop-blur-sm flex items-center justify-center border-2 border-green-300/30">
+            <div className="text-center">
+              <div className="text-green-600 font-bold text-base">LocalGoods</div>
+              <div className="text-green-500 text-sm">Explore</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Pagination Dots */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {Array.from({ length: categories.length - visibleItems + 1 }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveIndex(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-              activeIndex === index ? "bg-green-500 w-8" : "bg-gray-300 hover:bg-gray-400"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
     </div>
   )
 }
