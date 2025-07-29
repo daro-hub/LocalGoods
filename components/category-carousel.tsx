@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // Category data with images
@@ -19,7 +19,7 @@ const categories = [
     name: "Oils & Vinegars",
     description: "Premium olive oils and aged balsamic vinegars",
     image: "https://images.unsplash.com/photo-1652282565092-874e3a9c67b1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODZ8fG9saXZlJTIwb2lsfGVufDB8MHwwfHx8MA%3D%3D",
-    color: "",
+    color: "from-green-300 to-green-500",
     icon: "",
   },
   {
@@ -52,11 +52,16 @@ const categories = [
   },
 ]
 
-export default function CategoryCarousel() {
+interface CategoryCarouselProps {
+  onActiveCategoryChange?: (category: any, bgColor: string) => void
+}
+
+export default function CategoryCarousel({ onActiveCategoryChange }: CategoryCarouselProps) {
   const [rotation, setRotation] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const [autoplay, setAutoplay] = useState(true)
   const autoplayRef = useRef<NodeJS.Timeout | null>(null)
+  const [activeCategory, setActiveCategory] = useState(categories[0])
 
   // Autoplay functionality
   useEffect(() => {
@@ -93,111 +98,187 @@ export default function CategoryCarousel() {
     setTimeout(() => setIsAnimating(false), 500)
   }
 
+  // Update active category based on rotation
+  useEffect(() => {
+    const normalizedRotation = ((rotation % 360) + 360) % 360
+    const topCenterIndex = (6 - Math.round(normalizedRotation / 60)) % 6
+    const newActiveCategory = categories[topCenterIndex]
+    setActiveCategory(newActiveCategory)
+    
+    // Notify parent component about the change
+    if (onActiveCategoryChange) {
+      const bgColor = newActiveCategory.color || 'from-gray-100 to-gray-200'
+      // Convert Tailwind classes to CSS gradient
+      const gradientMap: { [key: string]: string } = {
+        'from-yellow-300 to-yellow-500': 'linear-gradient(135deg, #fde047, #eab308)',
+        'from-green-300 to-green-500': 'linear-gradient(135deg, #86efac, #22c55e)',
+        'from-amber-300 to-amber-500': 'linear-gradient(135deg, #fcd34d, #f59e0b)',
+        'from-red-300 to-red-600': 'linear-gradient(135deg, #fca5a5, #dc2626)',
+        'from-pink-300 to-pink-500': 'linear-gradient(135deg, #f9a8d4, #ec4899)',
+        'from-brown-300 to-brown-600': 'linear-gradient(135deg, #d4a574, #92400e)',
+        'from-gray-100 to-gray-200': 'linear-gradient(135deg, #f3f4f6, #e5e7eb)'
+      }
+      const cssGradient = gradientMap[bgColor] || gradientMap['from-gray-100 to-gray-200']
+      onActiveCategoryChange(newActiveCategory, cssGradient)
+    }
+  }, [rotation, onActiveCategoryChange])
+
   const pauseAutoplay = () => setAutoplay(false)
   const resumeAutoplay = () => setAutoplay(true)
 
   return (
-    <div className="relative py-4" onMouseEnter={pauseAutoplay} onMouseLeave={resumeAutoplay}>
-      {/* Navigation Buttons */}
-      <div className="absolute top-1/2 left-4 z-10 transform -translate-y-1/2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={prevRotation}
-          className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-      </div>
-      <div className="absolute top-1/2 right-4 z-10 transform -translate-y-1/2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={nextRotation}
-          className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </Button>
-      </div>
+    <div className="relative py-2 border-2 border-red-500" onMouseEnter={pauseAutoplay} onMouseLeave={resumeAutoplay}>
+      <div className="flex items-center gap-8 border-2 border-red-500">
+        {/* Left side - Carousel */}
+        <div className="flex-1 relative border-2 border-red-500">
+          {/* Navigation Buttons */}
+          <div className="absolute top-1/2 left-4 z-10 transform -translate-y-1/2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={prevRotation}
+              className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="absolute top-1/2 right-4 z-10 transform -translate-y-1/2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={nextRotation}
+              className="rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
 
-      {/* Circular Carousel Container */}
-      <div className="relative w-full h-[400px] flex items-end justify-center">
-        <motion.div
-          className="relative w-[600px] h-[600px] -mb-[400px]"
-          animate={{ rotate: rotation }}
-          transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        >
-          {categories.map((category, index) => {
-            // Start from -90 degrees (top) and space evenly
-            const angle = ((index * 60) - 90) * (Math.PI / 180) // Convert to radians, start from top
-            const radius = 280 // Distance from center
-            const x = Math.round(Math.cos(angle) * radius)
-            const y = Math.round(Math.sin(angle) * radius)
-            
-            // Calculate which card should be larger based on current rotation
-            // The card at the top center position should be larger
-            const cardAngle = ((index * 60) - 90 + rotation) % 360
-            const isTopCenter = Math.abs(cardAngle) < 30 || Math.abs(cardAngle - 360) < 30
-            const cardSize = isTopCenter ? 64 : 48 // 256px vs 192px
-            const cardOffset = isTopCenter ? 128 : 96 // Half of card size
-
-            return (
+          {/* Circular Carousel Container */}
+          <div className="relative w-full h-80 flex items-end justify-center" style={{ marginTop: '250px' }}>
+            <div className="relative w-[500px] h-[500px] rounded-full border-4 border-dashed border-gray-300">
               <motion.div
-                key={index}
-                className={`absolute ${isTopCenter ? 'w-64 h-64' : 'w-48 h-48'}`}
-                style={{
-                  left: `calc(50% + ${x}px - ${cardOffset}px)`,
-                  top: `calc(50% + ${y}px - ${cardOffset}px)`,
-                }}
-                initial={false}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
+                className="relative w-[500px] h-[500px]"
+                animate={{ rotate: rotation }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
               >
-                <Link href="/products" className="block">
-                  <motion.div 
-                    className={`relative rounded-full overflow-hidden group cursor-pointer ${isTopCenter ? 'h-64 w-64' : 'h-48 w-48'}`}
-                    animate={{ rotate: -rotation }}
-                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                  >
-                    {/* Background Image with Overlay */}
-                    <Image
-                      src={category.image || "/placeholder.svg"}
-                      alt={category.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-70 mix-blend-multiply`}
-                    />
+                {categories.map((category, index) => {
+                  // Start from -90 degrees (top) and space evenly
+                  const angle = ((index * 60) - 90) * (Math.PI / 180) // Convert to radians, start from top
+                  const radius = 220 // Distance from center
+                  const x = Math.round(Math.cos(angle) * radius)
+                  const y = Math.round(Math.sin(angle) * radius)
 
-                    {/* Content */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-                      <h3 className={`font-bold text-white mb-4 leading-tight ${isTopCenter ? 'text-2xl' : 'text-lg'}`}>{category.name}</h3>
-                      <p className={`text-white/90 leading-tight hidden group-hover:block ${isTopCenter ? 'text-lg' : 'text-sm'}`}>
-                        {category.description}
-                      </p>
-                    </div>
+                  // Calculate which element should be in the top center position
+                  const normalizedRotation = ((rotation % 360) + 360) % 360
+                  const topCenterIndex = (6 - Math.round(normalizedRotation / 60)) % 6
+                  const isTopCenter = index === topCenterIndex
 
-                    {/* Hover Effect */}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </motion.div>
-                </Link>
+                  return (
+                    <motion.div
+                      key={index}
+                      className="absolute w-40 h-40"
+                      style={{
+                        left: `calc(50% + ${x}px - 80px)`,
+                        top: `calc(50% + ${y}px - 80px)`,
+                      }}
+                      initial={false}
+                      animate={{ 
+                        opacity: 1, 
+                        scale: isTopCenter ? 1.3 : 1,
+                        zIndex: isTopCenter ? 10 : 1
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Link href="/products" className="block">
+                        <motion.div 
+                          className={`relative h-40 w-40 rounded-full overflow-hidden group cursor-pointer ${
+                            isTopCenter ? 'shadow-2xl' : 'shadow-lg'
+                          }`}
+                          style={{
+                            filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6))'
+                          }}
+                          animate={{ rotate: -rotation }}
+                          transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                        >
+                          {/* Background Image with Overlay */}
+                          <Image
+                            src={category.image || "/placeholder.svg"}
+                            alt={category.name}
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                          <div
+                            className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-70 mix-blend-multiply`}
+                          />
+
+                          {/* Content */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
+                            <h3 className="text-sm font-bold text-white mb-1 leading-tight">{category.name}</h3>
+                            <p className="text-xs text-white/90 leading-tight hidden group-hover:block">
+                              {category.description}
+                            </p>
+                          </div>
+
+                          {/* Hover Effect */}
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </motion.div>
+                      </Link>
+                    </motion.div>
+                  )
+                })}
               </motion.div>
-            )
-          })}
-        </motion.div>
 
-        {/* Center Element */}
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 z-10 -mb-[100px]">
-          <div className="w-32 h-32 rounded-full bg-green-500/20 backdrop-blur-sm flex items-center justify-center border-2 border-green-300/30">
-            <div className="text-center">
-              <div className="text-green-600 font-bold text-base">LocalGoods</div>
-              <div className="text-green-500 text-sm">Explore</div>
+              {/* Center Element */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                <Link href="/products" className="block">
+                  <div className="w-24 h-24 rounded-full bg-green-500/20 backdrop-blur-sm flex items-center justify-center border-2 border-green-300/30 hover:bg-green-500/30 transition-colors cursor-pointer">
+                    <div className="text-center">
+                      <div className="text-green-600 font-bold text-sm">LocalGoods</div>
+                      <div className="text-green-500 text-xs">Explore</div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
+        {/* Right side - Active Category Card */}
+        <div className="flex-1 h-80 flex items-center border-2 border-red-500">
+          <motion.div
+            key={activeCategory.name}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-transparent rounded-2xl p-8 shadow-2xl border-4 border-dashed border-gray-300 w-full h-full flex items-center"
+            style={{
+              filter: 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6))'
+            }}
+          >
+            <div className="flex items-center gap-6">
+              <div className="relative w-24 h-24 rounded-full overflow-hidden flex-shrink-0">
+                <Image
+                  src={activeCategory.image || "/placeholder.svg"}
+                  alt={activeCategory.name}
+                  fill
+                  className="object-cover"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${activeCategory.color} opacity-70 mix-blend-multiply`} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{activeCategory.name}</h3>
+                <p className="text-gray-600 leading-relaxed">{activeCategory.description}</p>
+                <Button className="mt-4 bg-green-600 hover:bg-green-700 text-white" asChild>
+                  <Link href="/products">
+                    Explore {activeCategory.name}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

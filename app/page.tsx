@@ -19,6 +19,7 @@ export default function Home() {
   const scrolling = useRef(false)
   const timeout = useRef<NodeJS.Timeout | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [categoryBgColor, setCategoryBgColor] = useState("#FCFAF7")
 
   // Track mouse position for parallax effects
   useEffect(() => {
@@ -303,29 +304,35 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section id="categories" className="min-h-screen snap-start bg-[#FCFAF7] flex items-center py-12">
-        <div className="container mx-auto px-6">
+      <section id="categories" className="h-screen snap-start flex items-center border-2 border-red-500" style={{
+        background: categoryBgColor
+      }}>
+        <div className="container mx-auto px-6 pt-20 pb-32 border-2 border-red-500">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-6"
+            className="text-center mb-12 mt-0 pt-8 border-2 border-red-500"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Explore Our Categories</h2>
-            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Explore Our Categories</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Discover the finest selection of authentic Italian products, carefully curated from local artisans and
               producers.
             </p>
           </motion.div>
 
           {/* Replace the grid with the new carousel component */}
-          <CategoryCarousel />
+          <CategoryCarousel 
+            onActiveCategoryChange={(category, bgColor) => {
+              setCategoryBgColor(bgColor)
+            }}
+          />
         </div>
       </section>
 
       {/* Why Buy Section */}
-      <section id="why-buy" className="h-screen snap-start bg-[#F5F3EF] flex items-center">
+      <section id="why-buy" className="h-screen snap-start bg-[#F5F3EF] flex items-center relative z-10">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
