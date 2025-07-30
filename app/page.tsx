@@ -15,7 +15,7 @@ import { profile } from "console"
 export default function Home() {
   const [currentSection, setCurrentSection] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
-  const sections = ["home", "categories", "why-buy", "testimonials", "about", "footer"]
+  const sections = ["home", "categories", "why-buy", "testimonials", "about", "collaborate"]
   const scrolling = useRef(false)
   const timeout = useRef<NodeJS.Timeout | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
@@ -163,35 +163,17 @@ export default function Home() {
               local products in a Click!
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed">
-              Discover our local artisans products and shop
-              <span className="relative mx-2 px-2 inline-block">
+              Discover our local artisans products and shop{" "}
+              <span className="bg-green-500/30 px-2 py-1 rounded-lg text-white font-medium">
                 fresh
-                <motion.span
-                  className="absolute inset-0 bg-green-500/20 rounded-lg -z-10"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.8, duration: 0.4 }}
-                />
               </span>
-              ,
-              <span className="relative mx-2 px-2">
+              ,{" "}
+              <span className="bg-green-500/30 px-2 py-1 rounded-lg text-white font-medium">
                 handmade
-                <motion.span
-                  className="absolute inset-0 bg-green-500/20 rounded-lg -z-10"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 1.0, duration: 0.4 }}
-                />
               </span>
-              , and
-              <span className="relative mx-2 px-2">
+              , and{" "}
+              <span className="bg-green-500/30 px-2 py-1 rounded-lg text-white font-medium">
                 sustainable
-                <motion.span
-                  className="absolute inset-0 bg-green-500/20 rounded-lg -z-10"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 1.2, duration: 0.4 }}
-                />
               </span>{" "}
               today!
             </p>
@@ -228,9 +210,9 @@ export default function Home() {
               <Image
                 src="https://images.unsplash.com/photo-1667406497887-437395f21d82?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGFncmljb2x0b3JlfGVufDB8MnwwfHx8MA%3D%3D"
                 alt="Field"
-                width={600}
-                height={600}
-                className="object-cover rounded-full"
+                width={400}
+                height={400}
+                className="object-cover rounded-full w-full h-full"
               />
 
               {/* Floating product badges */}
@@ -304,16 +286,16 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section id="categories" className="h-screen snap-start flex items-center border-2 border-red-500" style={{
+      <section id="categories" className="h-screen snap-start flex flex-col" style={{
         background: categoryBgColor
       }}>
-        <div className="container mx-auto px-6 pt-20 pb-32 border-2 border-red-500">
+        <div className="container mx-auto px-6 flex flex-col h-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-12 mt-0 pt-8 border-2 border-red-500"
+            className="text-center pt-20"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Explore Our Categories</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -323,16 +305,18 @@ export default function Home() {
           </motion.div>
 
           {/* Replace the grid with the new carousel component */}
-          <CategoryCarousel 
-            onActiveCategoryChange={(category, bgColor) => {
-              setCategoryBgColor(bgColor)
-            }}
-          />
+          <div className="flex-1 flex items-end">
+            <CategoryCarousel 
+              onActiveCategoryChange={(category, bgColor) => {
+                setCategoryBgColor(bgColor)
+              }}
+            />
+          </div>
         </div>
       </section>
 
       {/* Why Buy Section */}
-      <section id="why-buy" className="h-screen snap-start bg-[#F5F3EF] flex items-center relative z-10">
+      <section id="why-buy" className="h-screen snap-start bg-[#F5F3EF] flex items-center relative z-10 pt-20">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -495,7 +479,7 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="h-screen snap-start bg-[#F5F3EF] flex items-center">
+      <section id="about" className="h-screen snap-start bg-[#F5F3EF] flex items-center pt-20 pb-8">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -549,6 +533,128 @@ export default function Home() {
                 authenticity, and sustainability. By choosing LocalGoods, you're not just buying a product – you're
                 supporting a community and investing in a better future.
               </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Collaborate Section */}
+      <section id="collaborate" className="h-screen snap-start bg-[#FCFAF7] flex items-center pt-20">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-8"
+          >
+            <Badge className="mb-4 px-4 py-1.5 text-sm bg-green-100 text-green-800">Join Our Network</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Collaborate with Us</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Become part of our mission to bring authentic Italian products to customers worldwide.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Why Partner with LocalGoods?</h3>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-sm">1</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Global Reach</h4>
+                    <p className="text-gray-600 text-sm">Access customers worldwide through our platform.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-sm">2</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Fair Partnership</h4>
+                    <p className="text-gray-600 text-sm">Fair compensation and long-term relationships.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-sm">3</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Quality Focus</h4>
+                    <p className="text-gray-600 text-sm">High standards of quality and authenticity.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-bold text-sm">4</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">Support & Growth</h4>
+                    <p className="text-gray-600 text-sm">Marketing support and business growth assistance.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Get in Touch</h3>
+              <p className="text-gray-600 mb-4 text-sm">
+                Ready to join our network? Send us a message.
+              </p>
+              <form className="space-y-3">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <div>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    <option value="">Select product category</option>
+                    <option value="cheese">Cheese & Dairy</option>
+                    <option value="pasta">Pasta & Grains</option>
+                    <option value="oils">Oils & Vinegars</option>
+                    <option value="specialty">Specialty Products</option>
+                    <option value="spreads">Spreads & Sauces</option>
+                    <option value="wine">Wine & Beverages</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <textarea
+                    rows={3}
+                    placeholder="Tell us about your products..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm"
+                >
+                  Send Message
+                </Button>
+              </form>
             </motion.div>
           </div>
         </div>
